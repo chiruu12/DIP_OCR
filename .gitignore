@@ -12,3 +12,4 @@ env/
 *.h5
 data/
 *.pdf
+src/sample_documents/
