@@ -5,7 +5,6 @@ import os
 import argparse
 from pdf2image import convert_from_path
 
-# Import our project modules
 from config import settings
 import utils
 from model_loader import load_all_models
@@ -22,7 +21,6 @@ def predict_character(char_tensor, models):
         expert_output = expert_model(char_tensor)
         _, expert_idx = torch.max(expert_output, 1)
 
-        # Use the new, correct mapping from the config file
         character_map = settings.EXPERT_CHARACTER_MAPS[triage_decision]
         final_prediction = character_map.get(expert_idx.item(), '?')
 
@@ -34,7 +32,6 @@ def run_ocr_pipeline(image_data, models):
     gray_image = cv2.cvtColor(image_data, cv2.COLOR_BGR2GRAY)
     _, binary_image = cv2.threshold(gray_image, 0, 255, cv2.THRESH_BINARY_INV + cv2.THRESH_OTSU)
 
-    # Use the new, more robust sorting logic from utils.py
     bounding_boxes = utils.segment_characters(binary_image)
     if not bounding_boxes:
         return ""
@@ -45,14 +42,11 @@ def run_ocr_pipeline(image_data, models):
     previous_box = bounding_boxes[0]
 
     for box in bounding_boxes:
-        # Check for spaces and newlines based on the previous character's box
         prev_x, prev_y, prev_w, prev_h = previous_box
         curr_x, curr_y, _, _ = box
 
-        # Check for a new line (significant vertical jump)
         if curr_y > (prev_y + prev_h * settings.NEWLINE_THRESHOLD_FACTOR):
             recognized_elements.append('\n')
-        # Check for a space (significant horizontal jump)
         elif curr_x > (prev_x + prev_w + (prev_w * settings.SPACE_THRESHOLD_FACTOR)):
             recognized_elements.append(' ')
 

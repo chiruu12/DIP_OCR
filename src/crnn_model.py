@@ -53,8 +53,4 @@ class CRNN(nn.Module):
         rnn_output, _ = self.rnn(sequence)
 
         output = self.classifier(rnn_output)
-
-        # --- THIS IS THE FIX ---
-        # The model should return the (Batch, SequenceLength, NumClasses) tensor.
-        # The training loop will handle the permutation for the loss function.
         return output

@@ -23,26 +23,22 @@ def segment_characters(binary_image: np.ndarray, min_height: int = 10, min_width
         if h > min_height and w > min_width:
             bounding_boxes.append((x, y, w, h))
 
-    # --- THIS IS THE NEW, SMARTER SORTING LOGIC ---
     if not bounding_boxes:
         return []
 
-    # Group boxes into lines based on vertical overlap
     lines = []
-    sorted_boxes = sorted(bounding_boxes, key=lambda box: box[1])  # Sort by y-coordinate first
+    sorted_boxes = sorted(bounding_boxes, key=lambda box: box[1])
 
     current_line = [sorted_boxes[0]]
     for box in sorted_boxes[1:]:
         previous_box = current_line[-1]
-        # If the current box's y-center is within the vertical span of the previous box, it's on the same line
         if (box[1] + box[3] / 2) < (previous_box[1] + previous_box[3]):
             current_line.append(box)
         else:
             lines.append(current_line)
             current_line = [box]
-    lines.append(current_line)  # Add the last line
+    lines.append(current_line)
 
-    # Sort characters within each line by their x-coordinate
     final_sorted_boxes = []
     for line in lines:
         sorted_line = sorted(line, key=lambda box: box[0])

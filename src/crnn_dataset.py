@@ -1,4 +1,3 @@
-# In src/crnn_dataset.py
 import torch
 from torch.utils.data import Dataset
 import h5py
@@ -47,5 +46,4 @@ def collate_fn(batch):
     labels_concat = torch.cat(labels, 0)
     label_lengths = torch.tensor([len(lab) for lab in labels])
 
-    # Return the widths as part of the batch
     return images_tensor, labels_concat, label_lengths, torch.tensor(image_widths)

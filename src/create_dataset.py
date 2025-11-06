@@ -26,13 +26,10 @@ def find_text_lines_from_image(image_data):
     sorted_boxes = sorted(bounding_boxes, key=lambda b: b[1])
 
     for x, y, w, h in sorted_boxes:
-        # --- THIS IS THE STRICTEST FIX ---
-        # Only accept contours with a meaningful width AND height.
         if w > 15 and h > 8:
             pad = 2
             line_crop = binary[max(0, y - pad):y + h + pad, max(0, x - pad):x + w + pad]
 
-            # Final safeguard: ensure the cropped image is not empty or malformed.
             if line_crop is not None and line_crop.shape[0] > 0 and line_crop.shape[1] > 0:
                 line_boxes.append({'x': x, 'y': y, 'w': w, 'h': h, 'words': []})
                 line_crops.append(line_crop)
@@ -40,7 +37,6 @@ def find_text_lines_from_image(image_data):
     return line_boxes, line_crops
 
 
-# ... (The rest of the script is identical to the previous correct version) ...
 def align_text_with_lines(page_words, line_boxes):
     for x1, y1, x2, y2, word, _, _, _ in page_words:
         word_mid_y = (y1 + y2) / 2
@@ -98,7 +94,7 @@ def main():
                     image_chunk, label_chunk = [], []
                     for crop, text in zip(line_crops, line_texts):
                         filtered_text = "".join(c for c in text if c in all_chars)
-                        if len(filtered_text) > 2:  # Check is already here
+                        if len(filtered_text) > 2:
                             _, img_encoded = cv2.imencode('.png', crop)
                             image_chunk.append(img_encoded.flatten())
                             label_chunk.append(filtered_text)

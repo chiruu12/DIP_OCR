@@ -35,7 +35,6 @@ class RealLineDataset(Dataset):
         return self.num_samples
 
     def __getitem__(self, idx):
-        # --- THIS IS THE FINAL FIX: The Safety Net ---
         try:
             with h5py.File(self.h5_path, 'r') as hf:
                 img_encoded = hf['image_data'][idx]
@@ -64,13 +63,10 @@ class RealLineDataset(Dataset):
 
             return resized_image, label
         except Exception as e:
-            # If anything goes wrong, print a warning and return the first valid sample.
-            # This prevents the entire training epoch from crashing.
             print(f"\nWARNING: Corrupted data at index {idx}. Skipping. Error: {e}\n")
             return self.__getitem__(0)
 
 
-# ... (The rest of the script is identical to the previous correct version) ...
 def collate_fn(batch):
     images, labels = zip(*batch)
     image_widths = [img.shape[2] for img in images]
@@ -99,7 +95,6 @@ def decode_ctc_output(preds, int_to_char):
 
 
 def validate_on_real_page(model, int_to_char, pdf_path, page_num):
-    # ... (this function is correct)
     print("\n--- Running Real-World Validation ---")
     try:
         pil_image = convert_from_path(pdf_path, first_page=page_num, last_page=page_num, poppler_path=POPPLER_PATH)[0]

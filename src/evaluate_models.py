@@ -15,8 +15,6 @@ DEVICE = torch.device("mps" if torch.backends.mps.is_available() else "cpu")
 BATCH_SIZE = 256
 NUM_SAMPLES_PER_CLASS = 1000
 
-
-# --- DATASET AND MODEL LOADING ---
 class HDF5Dataset(Dataset):
     def __init__(self, h5_path, transform=None):
         self.h5_path = h5_path

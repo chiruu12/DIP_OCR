@@ -69,7 +69,6 @@ def main():
             expert_output = expert_model(char_tensor)
             _, expert_idx = torch.max(expert_output, 1)
 
-            # --- THE FIX: Use the new, correct mapping ---
             character_map = settings.EXPERT_CHARACTER_MAPS[triage_decision]
             final_prediction = character_map.get(expert_idx.item(), '?')
 

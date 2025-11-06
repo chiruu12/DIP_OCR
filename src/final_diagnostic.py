@@ -8,7 +8,6 @@ import h5py
 from src.crnn_model import CRNN
 from train_crnn import decode_ctc_output
 
-# --- CONFIGURATION ---
 PROJECT_ROOT = os.path.dirname(os.path.abspath(__file__))
 DEVICE = torch.device("mps" if torch.backends.mps.is_available() else "cpu")
 MODEL_PATH = os.path.join(PROJECT_ROOT, "models/crnn_finetuned/crnn_book_model.pth")
@@ -18,8 +17,6 @@ FONT_PATH = "/System/Library/Fonts/Supplemental/Times New Roman.ttf"
 IMAGE_HEIGHT = 32
 FONT_SIZE = 28
 
-# --- Ground Truth Text from Page 12 of the Book ---
-# We know this is what the model SHOULD be reading.
 TEST_LINES = [
     "Praise for Applied Machine Learning and AI for Engineers",
     "This book is a fantastic guide to machine learning and AI",
@@ -27,7 +24,6 @@ TEST_LINES = [
 ]
 
 
-# --- HELPER FUNCTIONS ---
 
 def render_perfect_line(text, font):
     """Re-creates a 'perfect' line image exactly like the training data."""
@@ -42,11 +38,9 @@ def render_perfect_line(text, font):
 def preprocess_for_model(line_image, is_from_scan=False):
     """Prepares an image for the model."""
     if is_from_scan:
-        # For real scans, we must binarize and invert
         _, binary_image = cv2.threshold(line_image, 0, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)
         image_to_process = binary_image
     else:
-        # For our perfect synthetic data, it's already clean
         image_to_process = line_image
 
     h, w = image_to_process.shape
@@ -62,7 +56,6 @@ def preprocess_for_model(line_image, is_from_scan=False):
 def main():
     print("--- Running Final Diagnostic A/B Test ---")
 
-    # 1. Load Model and Character Set
     print("Loading model...")
     with h5py.File(DATA_FILE, 'r') as hf:
         char_list = [c.decode('utf-8') for c in hf['char_list'][:]]
@@ -73,29 +66,23 @@ def main():
     print("Model loaded.")
     font = ImageFont.truetype(FONT_PATH, FONT_SIZE)
 
-    # 2. Hardcode the coordinates for the test lines from a real scan
-    # These are example coordinates from page 12.
     line_coords = [
-        (118, 114, 1551, 44),  # "Praise for..."
-        (118, 178, 1549, 36),  # "This book is..."
-        (118, 298, 1551, 35)  # "the concrete examples..."
+        (118, 114, 1551, 44),
+        (118, 178, 1549, 36),
+        (118, 298, 1551, 35)
     ]
 
-    # Load the real page image once
-    # This requires `pdf2image` and `poppler` to be set up
     from pdf2image import convert_from_path
     pdf_path = os.path.join(PROJECT_ROOT, "sample_documents/books/Applied-Machine-Learning-and-AI-for-Engineers.pdf")
     pil_image = convert_from_path(pdf_path, first_page=12, last_page=12)[0]
     page_image = cv2.cvtColor(np.array(pil_image), cv2.COLOR_RGB2GRAY)
 
-    # 3. Run the A/B Test
     with torch.no_grad():
         for i, ground_truth_text in enumerate(TEST_LINES):
             print("\n" + "=" * 50)
             print(f"TESTING LINE {i + 1}: '{ground_truth_text}'")
             print("=" * 50)
 
-            # --- Test A: The REAL Scanned Line ---
             x, y, w, h = line_coords[i]
             real_line_crop = page_image[y:y + h, x:x + w]
             real_tensor = preprocess_for_model(real_line_crop, is_from_scan=True)
@@ -104,7 +91,6 @@ def main():
 
             print(f"  -> Prediction from REAL SCAN: '{real_decoded_text}'")
 
-            # --- Test B: The PERFECT Synthetic Line ---
             perfect_line_image = render_perfect_line(ground_truth_text, font)
             perfect_tensor = preprocess_for_model(perfect_line_image, is_from_scan=False)
             perfect_preds = model(perfect_tensor)
@@ -112,13 +98,10 @@ def main():
 
             print(f"  -> Prediction from PERFECT RENDER: '{perfect_decoded_text}'")
 
-            # --- Save Visual Evidence ---
-            # Resize real crop to match height for easy comparison
             h_real, w_real = real_line_crop.shape
             scale = perfect_line_image.shape[0] / h_real
             resized_real_crop = cv2.resize(real_line_crop, (int(w_real * scale), perfect_line_image.shape[0]))
 
-            # Pad the shorter image to match the width of the longer one
             width_diff = abs(resized_real_crop.shape[1] - perfect_line_image.shape[1])
             if resized_real_crop.shape[1] < perfect_line_image.shape[1]:
                 resized_real_crop = cv2.copyMakeBorder(resized_real_crop, 0, 0, 0, width_diff, cv2.BORDER_CONSTANT,

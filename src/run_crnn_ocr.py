@@ -8,11 +8,9 @@ import h5py
 from tqdm import tqdm
 import shutil
 
-# Import our custom CRNN modules
 from crnn_model import CRNN
 
 
-# We include the decoder function here to make the script self-contained
 def decode_ctc_output(preds, int_to_char):
     texts = []
     preds_idx = preds.argmax(2).cpu().numpy()
@@ -26,7 +24,6 @@ def decode_ctc_output(preds, int_to_char):
     return texts
 
 
-# --- CONFIGURATION ---
 PROJECT_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 DEVICE = torch.device("mps" if torch.backends.mps.is_available() else "cpu")
 MODEL_PATH = os.path.join(PROJECT_ROOT, "src/models/crnn_final/crnn_real_data_model.pth")
@@ -72,8 +69,6 @@ def main():
 
     abs_file_path = os.path.join(PROJECT_ROOT, args.file_path)
 
-    # --- THIS IS THE CRITICAL FIX ---
-    # 1. Load the OFFICIAL character list FROM THE HDF5 FILE that the model was trained on.
     print("Loading trained CRNN model and OFFICIAL character set from HDF5 file...")
     try:
         with h5py.File(DATA_FILE, 'r') as hf:
@@ -84,7 +79,6 @@ def main():
         print(f"FATAL ERROR: Dataset file not found at '{DATA_FILE}'. Cannot determine character map.")
         return
 
-    # 2. Initialize the model with the CORRECT number of characters from the dataset.
     model = CRNN(num_chars=len(char_list)).to(DEVICE)
     try:
         model.load_state_dict(torch.load(MODEL_PATH, map_location=DEVICE))
