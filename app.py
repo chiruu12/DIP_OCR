@@ -1,7 +1,6 @@
 import torch
 import cv2
 import numpy as np
-import os
 from pdf2image import convert_from_path
 import gradio as gr
 
