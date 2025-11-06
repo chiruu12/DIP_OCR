@@ -1,0 +1,13 @@
+# Python temp files
+__pycache__/
+*.pyc
+.venv/
+env/
+
+# IDE config
+.idea/
+.vscode/
+
+# LARGE DATA FILES TO IGNORE
+*.h5
+data/
