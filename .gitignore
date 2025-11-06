@@ -11,3 +11,4 @@ env/
 # LARGE DATA FILES TO IGNORE
 *.h5
 data/
+*.pdf
