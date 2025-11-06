@@ -1,0 +1,18 @@
+# Python temp files
+__pycache__/
+*.pyc
+.venv/
+env/
+
+# IDE config
+.idea/
+.vscode/
+
+# LARGE DATA FILES TO IGNORE
+*.h5
+data/
+*.pdf
+src/sample_documents/
+src/evaluation_samples/
+src/debug_output/
+
