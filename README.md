@@ -1,3 +1,14 @@
+---
+title: Custom Book OCR Engine
+emoji: 📖
+colorFrom: blue
+colorTo: indigo
+sdk: gradio
+sdk_version: "4.26.0"
+app_file: app.py
+pinned: false
+---
+
 # Custom OCR System for Book Digitization
 
 ## 1. Project Overview
